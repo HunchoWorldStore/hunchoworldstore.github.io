@@ -1,6 +1,6 @@
 # Huncho World Storefront
 
-**Version 1.0.7**
+**Version 1.0.8**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
@@ -28,12 +28,17 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 | `discordUrl` | Discord invite in the header and footer |
 | `brand` | Checkout popup colours |
 | `hide` | Package or category names to keep off the site (Fayettenam is hidden) |
-| `discord` | Asks buyers for their Discord user ID and sends it to Tebex as `discord_id` (for Discord roles / messages). `ask: false` turns it off |
+| `discord` | Buyers sign in with Discord before checkout; their Discord ID goes to Tebex as `discord_id` (for Discord roles / messages). Needs `clientId` from a Discord application (redirect `https://hunchoworldstore.github.io/`). Without it, buyers type their ID instead. `ask: false` turns it off |
 | `docs` | Matches a package name to its docs section and a fallback image |
 
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.8
+
+* **Sign in with Discord** in the cart instead of typing a user ID (needs `CONFIG.discord.clientId`)
+* Checkout carries on by itself after the Discord sign-in
 
 ### 1.0.7
 

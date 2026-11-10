@@ -114,6 +114,13 @@
   .field input:focus{outline:none;border-color:var(--blue)}
   .field input.bad{border-color:var(--bad)}
   .field .err{color:#fca5a5}
+  .discordbtn{background:#5865F2;border-color:#5865F2;color:#fff}
+  .discordbtn:hover{background:#4752c4;border-color:#4752c4}
+  .dsi{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+  .dsi img{width:32px;height:32px;border-radius:50%;background:#5865F2}
+  .dsi div{flex:1;display:grid;line-height:1.25}
+  .dsi b{color:var(--text);font-size:14px}
+  .dsi small{color:var(--muted);font-size:12px}
   .field details{font-size:12px}
   .field summary{cursor:pointer;color:var(--blue2)}
   .total{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
@@ -199,16 +206,29 @@
   <div class="items" id="cartItems"></div>
   <div class="dfoot">
     <div class="total"><span>Total</span><span id="cartTotal">—</span></div>
-    <label class="field" id="discordField">
+    <div class="field" id="discordField">
+      <span>Discord</span>
+      <div class="dsi" id="discordSignedIn" hidden>
+        <img id="discordAvatar" alt="">
+        <div><b id="discordName"></b><small>Signed in with Discord</small></div>
+        <button class="rm" id="discordSwitch" type="button">Switch</button>
+      </div>
+      <button class="btn discordbtn" id="discordLogin" type="button" hidden>
+        <svg width="18" height="14" viewBox="0 0 71 55" aria-hidden="true"><path fill="currentColor" d="M60.1 4.9A58.5 58.5 0 0 0 45.6.4a40 40 0 0 0-1.9 3.8 54 54 0 0 0-16.2 0A40 40 0 0 0 25.6.4 58.4 58.4 0 0 0 11 4.9C1.6 18.7-.9 32.2.3 45.5a58.9 58.9 0 0 0 18 9.1 43 43 0 0 0 3.8-6.2 38.2 38.2 0 0 1-6-2.9l1.5-1.1a42 42 0 0 0 36 0l1.5 1.1a38 38 0 0 1-6 2.9 43 43 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72.4 30.1 68.4 16.7 60.1 4.9ZM23.7 37.3c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2 6.5 3.3 6.4 7.2c0 4-2.8 7.2-6.4 7.2Z"/></svg>
+        Sign in with Discord
+      </button>
+      <small id="discordWhy">So we can give you your buyer role in our Discord.</small>
+      <label class="field" id="discordManual" hidden>
       <span>Your Discord user ID</span>
       <input id="discordId" inputmode="numeric" autocomplete="off" placeholder="e.g. 284102381038059520">
       <small class="err" id="discordErr" hidden>Enter your Discord user ID: 17 to 20 numbers, not your username.</small>
       <details><summary>How do I find it?</summary>
-        In Discord: <b>Settings → Advanced</b> → turn on <b>Developer Mode</b>. Then tap or right-click your profile picture and choose <b>Copy User ID</b>. We use it to give you your buyer role in our Discord.
+        In Discord: <b>Settings → Advanced</b> → turn on <b>Developer Mode</b>. Then tap or right-click your profile picture and choose <b>Copy User ID</b>.
       </details>
-    </label>
+      </label>
+    </div>
     <button class="btn primary" id="checkoutBtn">Checkout</button>
-    <div class="note">You'll sign in with your Cfx.re account first, so the script lands in your FiveM keymaster.</div>
+    <div class="note">You'll also sign in with your Cfx.re account, so the script lands in your FiveM keymaster.</div>
     <div class="fallback" id="fallback" hidden>
       <div id="fallbackMsg"></div>
       <a class="btn" id="fallbackBtn" target="_blank" rel="noopener">Finish on Tebex</a>
@@ -231,7 +251,9 @@ const CONFIG = {
   // Tebex packages (or whole categories) to keep off the site, matched by name.
   hide: [/fayettenam/i],
   // Ask for the buyer's Discord ID and send it to Tebex with every package (Tebex variable "discord_id").
-  discord: { ask: true, variable: "discord_id" },
+  // clientId: from discord.com/developers/applications (OAuth2 → Client ID). Redirect must be https://hunchoworldstore.github.io/
+  // Without a clientId the cart falls back to typing the Discord user ID.
+  discord: { ask: true, variable: "discord_id", clientId: "" },
   // Matches a Tebex package name to its docs section (first match wins).
   docs: [
     { match: /phone/i, path: "/huncho-phone", image: "assets/huncho-phone.jpg" },
@@ -494,9 +516,57 @@ async function finishCheckout(basket){
 }
 
 const discordRe = /^\d{17,20}$/;
+const useDiscordLogin = () => CONFIG.discord.ask && !!CONFIG.discord.clientId;
+const discordUser = () => store.get("hw_discord_user", null);
 function discordValue(){ return ($("#discordId").value || "").replace(/\s/g, ""); }
+
+function renderDiscord(){
+  $("#discordField").hidden = !CONFIG.discord.ask;
+  if(!CONFIG.discord.ask) return;
+  const login = useDiscordLogin(), u = discordUser();
+  $("#discordManual").hidden = login;
+  $("#discordWhy").hidden = !login;
+  $("#discordLogin").hidden = !login || !!u;
+  $("#discordSignedIn").hidden = !login || !u;
+  if(login && u){ $("#discordName").textContent = u.name; $("#discordAvatar").src = u.avatar; }
+}
+
+function discordSignIn(){
+  const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  store.set("hw_discord_state", state);
+  location.href = "https://discord.com/oauth2/authorize?" + new URLSearchParams({
+    client_id: CONFIG.discord.clientId, response_type: "token", scope: "identify",
+    redirect_uri: pageUrl(), state, prompt: "none",
+  });
+}
+
+// Back from Discord: the token is in the URL fragment. Only used once to read the buyer's Discord ID.
+async function handleDiscordReturn(){
+  const h = new URLSearchParams(location.hash.slice(1));
+  if(!h.has("access_token") && !h.has("error")) return false;
+  history.replaceState(null, "", pageUrl() + location.search);
+  const expected = store.get("hw_discord_state", null); store.del("hw_discord_state");
+  if(h.has("error") || !expected || h.get("state") !== expected){ toast("Discord sign-in was cancelled.", "bad"); store.del("hw_after_discord"); return false; }
+  try{
+    const r = await fetch("https://discord.com/api/users/@me", { headers: { Authorization: "Bearer " + h.get("access_token") } });
+    if(!r.ok) throw new Error("Discord said " + r.status);
+    const me = await r.json();
+    const avatar = me.avatar ? `https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png?size=64`
+                             : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(me.id) >> 22n) % 6n)}.png`;
+    store.set("hw_discord_user", { id: me.id, name: me.global_name || me.username, avatar });
+    renderDiscord();
+    return true;
+  }catch(e){ console.error(e); toast("Couldn't read your Discord account. Please try again.", "bad"); store.del("hw_after_discord"); return false; }
+}
+
 function discordOk(){
   if(!CONFIG.discord.ask) return true;
+  if(useDiscordLogin()){
+    if(discordUser()) return true;
+    store.set("hw_after_discord", 1);   // carry on to checkout when they come back
+    discordSignIn();
+    return false;
+  }
   const v = discordValue(), ok = discordRe.test(v);
   $("#discordId").classList.toggle("bad", !ok); $("#discordErr").hidden = ok;
   if(ok) store.set("hw_discord", v); else $("#discordId").focus();
@@ -504,7 +574,7 @@ function discordOk(){
 }
 function variableData(){
   if(!CONFIG.discord.ask) return undefined;
-  const v = store.get("hw_discord", "") || discordValue();
+  const v = useDiscordLogin() ? (discordUser() || {}).id : (store.get("hw_discord", "") || discordValue());
   return v ? { [CONFIG.discord.variable]: v } : undefined;
 }
 
@@ -606,7 +676,9 @@ $("#search").addEventListener("input", renderGrid);
 ["#discordLink","#discordLink2"].forEach(s => $(s).href = CONFIG.discordUrl);
 $("#tebexLink").href = CONFIG.tebexStoreUrl;
 $("#yr").textContent = new Date().getFullYear();
-$("#discordField").hidden = !CONFIG.discord.ask;
+renderDiscord();
+$("#discordLogin").addEventListener("click", discordSignIn);
+$("#discordSwitch").addEventListener("click", () => { store.del("hw_discord_user"); renderDiscord(); discordSignIn(); });
 $("#discordId").value = store.get("hw_discord", "");
 $("#discordId").addEventListener("input", () => { $("#discordId").classList.remove("bad"); $("#discordErr").hidden = true; });
 
@@ -616,6 +688,9 @@ $("#discordId").addEventListener("input", () => { $("#discordId").classList.remo
   const qs = new URLSearchParams(location.search);
   if(qs.has("checkout")){ paid(); history.replaceState(null, "", pageUrl()); }
   else if(qs.has("resume") && live){ history.replaceState(null, "", pageUrl()); resumeAfterAuth(); }
+  else if(await handleDiscordReturn() && store.get("hw_after_discord", null)){
+    store.del("hw_after_discord"); hide(); show("#cart"); toast("Signed in with Discord", "ok"); checkout();
+  }
 })();
 </script>
 </body>
