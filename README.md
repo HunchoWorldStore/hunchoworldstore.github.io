@@ -1,6 +1,6 @@
 # Huncho World Storefront
 
-**Version 1.0.8**
+**Version 1.0.9**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
@@ -34,6 +34,11 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.9
+
+* Huncho World Store logo: header, hero, cart, browser tab icon and link previews
+* Sign in with Discord switched on (Discord app client ID added)
 
 ### 1.0.8
 
