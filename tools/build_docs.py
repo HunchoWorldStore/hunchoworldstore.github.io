@@ -83,6 +83,7 @@ def flat(items):
 def route(sec, file):
     stem = re.sub(r"\.md$", "", file)
     stem = re.sub(r"(^|/)README$", "", stem)
+    if sec["slug"] == "getting-started": stem = re.sub(r"^getting-started/", "", stem)
     return f"{BASE}/{sec['slug']}/" + (stem + "/" if stem else "")
 
 # ---------------------------------------------------------------- markdown
