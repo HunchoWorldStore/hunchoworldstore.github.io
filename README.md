@@ -1,6 +1,6 @@
 # Huncho World Storefront
 
-**Version 1.0.3**
+**Version 1.0.4**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
@@ -32,6 +32,10 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.4
+
+* Designer bags: Docs button shows whatever the Tebex package is called (bags, bookbags, backpacks, designer)
 
 ### 1.0.3
 
