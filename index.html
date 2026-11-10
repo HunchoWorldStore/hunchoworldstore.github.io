@@ -172,7 +172,7 @@
       <div>
       <div class="eyebrow">FiveM scripts · Qbox · QBCore · ESX</div>
       <h1>Scripts built for <span class="chrome">real roleplay</span>.</h1>
-      <p>Everything we sell runs on our own city first. Drop it in, it auto-detects your framework and scripts, and every product has full docs you can search right here.</p>
+      <p>Everything we sell runs on our own city first. Drop it in, it auto-detects your framework and scripts, and every product has full, searchable docs.</p>
       <div class="ctas">
         <a class="btn primary" href="#scripts">Browse scripts</a>
         <button class="btn" data-docs="/">Read the docs</button>
@@ -185,7 +185,7 @@
 
   <section class="wrap" id="scripts">
     <div class="tools">
-      <div><h2>Scripts</h2><p class="sub">Tap a script for the full breakdown, or open its docs without leaving the store.</p></div>
+      <div><h2>Scripts</h2><p class="sub">Tap a script for the full breakdown, or open its docs.</p></div>
       <input class="search" id="search" type="search" placeholder="Search scripts…" aria-label="Search scripts">
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
@@ -257,7 +257,7 @@ const CONFIG = {
   // Tebex Creator Panel → Developers → API Keys (creator.tebex.io/developers/api-keys) → "Public Token" (safe to put in a website).
   tebexToken: "14vnl-dd607b30bf300f1ef0e527a0c5fad8155c595d8b",
   tebexStoreUrl: "https://huncho-world-fivem-store.tebex.store/",
-  docsSiteUrl: "https://huncho-world-store.gitbook.io/huncho-world-store-docs",
+  docsSiteUrl: "/docs",
   discordUrl: "https://discord.gg/hP8VTtwgs5",
   brand: { primary: "#3b82f6", secondary: "#0c1324" },
   // Tebex packages (or whole categories) to keep off the site, matched by name.
@@ -632,38 +632,10 @@ async function resumeAfterAuth(){
   }catch(e){ show("#cart"); checkoutFailed(e); }
 }
 
-/* ===================== GITBOOK DOCS EMBED ===================== */
-let gbReady = false;
-// Phones and small screens get the real docs pages in a new tab instead of the pop-up widget.
-const isSmallScreen = () => window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
-function loadDocsEmbed(){
-  if(isSmallScreen()) return;
-  const s = document.createElement("script");
-  s.src = CONFIG.docsSiteUrl + "/~gitbook/embed/script.js";
-  s.async = true;
-  s.onload = () => {
-    try{
-      window.GitBook("init", { siteURL: CONFIG.docsSiteUrl }, { colorScheme: "dark" });
-      window.GitBook("configure", {
-        button: { label: "Ask the docs", icon: "book" },
-        suggestions: ["How do I install Huncho Phone?", "Which frameworks are supported?", "How do I update a script?"],
-      });
-      window.GitBook("show");
-      gbReady = true;
-    }catch(e){ console.warn("GitBook embed init failed", e); }
-  };
-  s.onerror = () => console.warn("GitBook embed script didn't load. Check Settings → AI & MCP in GitBook for the embed URL.");
-  document.head.appendChild(s);
-}
+/* ===================== DOCS ===================== */
+// Docs live on this site at /docs (built from the GitBook docs repo).
 function openDocs(path){
-  if(gbReady && !isSmallScreen()){
-    try{
-      window.GitBook("open");
-      if(path && path !== "/") window.GitBook("navigateToPage", path);
-      hide(); return;
-    }catch(e){}
-  }
-  window.open(CONFIG.docsSiteUrl + (path === "/" ? "" : path), "_blank", "noopener");
+  location.href = "/docs" + (path && path !== "/" ? path + "/" : "/");
 }
 
 /* ===================== UI WIRING ===================== */
@@ -695,7 +667,6 @@ $("#discordId").value = store.get("hw_discord", "");
 $("#discordId").addEventListener("input", () => { $("#discordId").classList.remove("bad"); $("#discordErr").hidden = true; });
 
 (async function init(){
-  loadDocsEmbed();
   await loadCatalog();
   const qs = new URLSearchParams(location.search);
   if(qs.has("checkout")){ paid(); history.replaceState(null, "", pageUrl()); }

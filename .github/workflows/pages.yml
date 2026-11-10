@@ -3,12 +3,14 @@ name: Deploy storefront
 on:
   push:
     branches: [main]
-    paths:
-      - "**"
+  schedule:
+    - cron: "23 * * * *"   # hourly: picks up docs edits from huncho-phone-docs
+  repository_dispatch:
+    types: [docs-updated]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -24,6 +26,30 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get the docs
+        uses: actions/checkout@v4
+        with:
+          repository: HunchoWorldStore/huncho-phone-docs
+          path: _docs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build docs site
+        run: |
+          pip install --quiet markdown pyyaml pillow
+          python tools/build_docs.py _docs docs
+          rm -rf _docs
+
+      - name: Save built docs in the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git diff --cached --quiet || (git commit -m "Rebuild docs site" && git push)
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
