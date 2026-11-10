@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huncho World Store · FiveM Scripts</title>
+<meta name="description" content="Premium FiveM scripts by Huncho World: Huncho Phone, Game Pack, NPC Police, Job Center and Designer Bookbags. Qbox, QBCore and ESX.">
+<meta property="og:title" content="Huncho World Store">
+<meta property="og:description" content="Premium FiveM scripts for Qbox, QBCore and ESX servers.">
+<meta property="og:image" content="assets/huncho-phone.jpg">
+<meta name="theme-color" content="#070b16">
+<script defer src="https://js.tebex.io/v/1.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --panel:#0c1324; --panel2:#101a31; --line:#1d2a48; --line2:#2a3b63;
+    --text:#e8eefc; --muted:#8a9bc2; --blue:#3b82f6; --blue2:#60a5fa; --chrome:#c9d6ee;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --r:10px;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif}
+  a{color:var(--blue2);text-decoration:none}
+  button{font:inherit;cursor:pointer}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+  /* header */
+  header{position:sticky;top:0;z-index:20;background:rgba(7,11,22,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:18px;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px;color:var(--text)}
+  .badge{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;font-weight:800;font-size:13px;letter-spacing:.5px;
+    color:#071022;background:linear-gradient(145deg,#f2f6ff 0%,#9fb4d9 45%,#5b78b0 55%,#dfe8fb 100%);box-shadow:0 0 0 1px #2c3e66,0 4px 18px rgba(59,130,246,.35)}
+  nav.top{display:flex;gap:4px;margin-left:auto}
+  nav.top a{color:var(--muted);padding:8px 12px;border-radius:8px;font-size:14px}
+  nav.top a:hover{color:var(--text);background:var(--panel)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line2);background:transparent;color:var(--text);
+    padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;transition:.15s;white-space:nowrap}
+  .btn:hover{border-color:var(--blue);color:#fff;background:rgba(59,130,246,.08)}
+  .btn.primary{border-color:var(--blue);color:#fff;background:var(--blue)}
+  .btn.primary:hover{background:#2f6fe0}
+  .btn.ghost{border-color:transparent}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .cartbtn{position:relative}
+  .count{position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--blue);color:#fff;font-size:11px;display:grid;place-items:center}
+  .count:empty{display:none}
+
+  /* hero */
+  .hero{padding:64px 0 40px;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:-40% -10% auto auto;width:720px;height:720px;background:radial-gradient(closest-side,rgba(59,130,246,.22),transparent);pointer-events:none}
+  .eyebrow{color:var(--blue2);font-weight:700;font-size:12px;letter-spacing:1.6px;text-transform:uppercase}
+  h1{font-size:clamp(32px,5vw,52px);line-height:1.08;margin:12px 0 14px;letter-spacing:-.5px}
+  h1 .chrome{background:linear-gradient(180deg,#fff 0%,#c9d6ee 50%,#7f97c4 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);max-width:620px;font-size:17px;margin:0 0 24px}
+  .hero .ctas{display:flex;gap:10px;flex-wrap:wrap}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}
+  .chip{font-size:12px;color:var(--chrome);border:1px solid var(--line);background:var(--panel);padding:4px 10px;border-radius:20px}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 22px;overflow-x:auto;scrollbar-width:none}
+  .tabs button{background:none;border:0;color:var(--muted);padding:12px 14px;font-weight:600;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+  .tabs button.on{color:var(--text);border-color:var(--blue)}
+  .tools{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .search{flex:1;min-width:220px;max-width:340px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:10px 14px;border-radius:8px;font:inherit}
+  .search:focus{outline:none;border-color:var(--blue)}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;padding-bottom:50px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:.18s}
+  .card:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .thumb{aspect-ratio:16/9;background:#0a1020 radial-gradient(closest-side,rgba(59,130,246,.18),transparent) center/cover no-repeat;cursor:pointer;position:relative}
+  .sale{position:absolute;top:10px;left:10px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px}
+  .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .title{font-weight:700;font-size:17px;margin:0;cursor:pointer}
+  .desc{color:var(--muted);font-size:14px;margin:0;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .meta{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:5px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:6px;border-top:1px solid var(--line)}
+  .price{font-weight:800;font-size:18px}
+  .price s{color:var(--muted);font-weight:500;font-size:13px;margin-right:6px}
+  .actions{display:flex;gap:6px}
+  .empty{color:var(--muted);text-align:center;padding:50px 0;grid-column:1/-1}
+  .skel{height:340px;background:linear-gradient(90deg,var(--panel) 0%,var(--panel2) 50%,var(--panel) 100%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:var(--r)}
+  @keyframes sh{to{background-position:-200% 0}}
+
+  /* why */
+  .why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;padding:10px 0 60px}
+  .why div{border:1px solid var(--line);border-radius:var(--r);padding:18px;background:linear-gradient(180deg,var(--panel),transparent)}
+  .why b{display:block;margin-bottom:4px}
+  .why span{color:var(--muted);font-size:14px}
+  h2{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 18px}
+
+  /* overlay / modal / drawer */
+  .scrim{position:fixed;inset:0;background:rgba(2,5,12,.7);z-index:40;opacity:0;pointer-events:none;transition:.2s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--panel);border-left:1px solid var(--line);z-index:50;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
+  .drawer.on{transform:none}
+  .dhead{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .dhead .hw{display:flex;align-items:center;gap:10px;font-weight:700}
+  .dhead .hw .badge{width:26px;height:26px;font-size:10px;border-radius:6px}
+  .x{background:none;border:1px solid var(--line);color:var(--muted);width:32px;height:32px;border-radius:7px;font-size:18px;line-height:1}
+  .x:hover{color:#fff;border-color:var(--line2)}
+  .items{flex:1;overflow:auto;padding:8px 18px}
+  .item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .item img{width:72px;height:40px;object-fit:cover;border-radius:6px;background:#0a1020}
+  .item .n{flex:1;font-weight:600;font-size:14px}
+  .item .p{color:var(--muted);font-size:13px}
+  .rm{background:none;border:0;color:var(--muted);font-size:13px}
+  .rm:hover{color:var(--bad)}
+  .dfoot{padding:16px 18px;border-top:1px solid var(--line);display:grid;gap:10px}
+  .total{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
+  .note{color:var(--muted);font-size:12px}
+  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(860px,94vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;z-index:50;opacity:0;pointer-events:none;transition:.2s}
+  .modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+  .modal .thumb{cursor:default;border-bottom:1px solid var(--line)}
+  .modal .mb{padding:20px 22px;display:grid;gap:14px}
+  .modal .x{position:absolute;top:12px;right:12px;background:rgba(7,11,22,.75)}
+  .rich{color:#c8d3ec;font-size:14.5px}
+  .rich img,.rich iframe{max-width:100%;border-radius:8px}
+  .rich h1,.rich h2,.rich h3{font-size:17px;margin:16px 0 6px;color:var(--text)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);background:var(--panel2);border:1px solid var(--line2);padding:12px 18px;border-radius:10px;z-index:60;opacity:0;transition:.25s;max-width:92vw;font-size:14px}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .toast.bad{border-color:var(--bad)} .toast.ok{border-color:var(--ok)}
+  .devnote{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);color:#fcd9a0;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:18px}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding:26px 0 90px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  @media (max-width:640px){nav.top{display:none}.hero{padding:40px 0 26px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top"><span class="badge">HW</span><span>Huncho World Store</span></a>
+    <nav class="top">
+      <a href="#scripts">Scripts</a>
+      <a href="#" data-docs="/">Docs</a>
+      <a id="discordLink" target="_blank" rel="noopener">Discord</a>
+    </nav>
+    <button class="btn cartbtn" id="openCart" aria-label="Open cart">Cart<span class="count" id="cartCount"></span></button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">FiveM scripts · Qbox · QBCore · ESX</div>
+      <h1>Scripts built for <span class="chrome">real roleplay</span>.</h1>
+      <p>Everything we sell runs on our own city first. Drop it in, it auto-detects your framework and scripts, and every product has full docs you can search right here.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#scripts">Browse scripts</a>
+        <button class="btn" data-docs="/">Read the docs</button>
+      </div>
+      <div class="chips"><span class="chip">Instant delivery via Cfx keymaster</span><span class="chip">Free updates</span><span class="chip">Discord support</span><span class="chip">Auto-detects 50+ scripts</span></div>
+      <div class="devnote" id="devnote" hidden></div>
+    </div>
+  </section>
+
+  <section class="wrap" id="scripts">
+    <div class="tools">
+      <div><h2>Scripts</h2><p class="sub">Tap a script for the full breakdown, or open its docs without leaving the store.</p></div>
+      <input class="search" id="search" type="search" placeholder="Search scripts…" aria-label="Search scripts">
+    </div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="wrap">
+    <h2>Why Huncho World</h2>
+    <p class="sub">Made by a server owner, for server owners.</p>
+    <div class="why">
+      <div><b>Battle-tested</b><span>Every script runs on Huncho World Roleplay before it hits the store.</span></div>
+      <div><b>Drop-in setup</b><span>Framework, inventory, target, banking and more are detected for you.</span></div>
+      <div><b>Real docs</b><span>Installation, config, exports and troubleshooting for every script.</span></div>
+      <div><b>Updates that land</b><span>Changelogs post straight to our Discord and to your console.</span></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr"></span> Huncho World. Payments handled securely by Tebex. Not affiliated with Rockstar Games or Take-Two.</span>
+    <span><a href="#" data-docs="/">Docs</a> · <a id="discordLink2" target="_blank" rel="noopener">Discord</a> · <a id="tebexLink" target="_blank" rel="noopener">Tebex store</a></span>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="cart" aria-label="Cart">
+  <div class="dhead"><span class="hw"><span class="badge">HW</span>Your cart</span><button class="x" data-close>&times;</button></div>
+  <div class="items" id="cartItems"></div>
+  <div class="dfoot">
+    <div class="total"><span>Total</span><span id="cartTotal">—</span></div>
+    <button class="btn primary" id="checkoutBtn">Checkout</button>
+    <div class="note">You'll sign in with your Cfx.re account first, so the script lands in your FiveM keymaster.</div>
+  </div>
+</aside>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const CONFIG = {
+  // Tebex Creator Panel → Developers → API Keys (creator.tebex.io/developers/api-keys) → "Public Token" (safe to put in a website).
+  tebexToken: "14vnl-dd607b30bf300f1ef0e527a0c5fad8155c595d8b",
+  tebexStoreUrl: "https://huncho-world-fivem-store.tebex.store/",
+  docsSiteUrl: "https://huncho-world-store.gitbook.io/huncho-world-store-docs",
+  discordUrl: "https://discord.gg/hP8VTtwgs5",
+  brand: { primary: "#3b82f6", secondary: "#0c1324" },
+  // Matches a Tebex package name to its docs section (first match wins).
+  docs: [
+    { match: /phone/i, path: "/huncho-phone", image: "assets/huncho-phone.jpg" },
+    { match: /game ?pack/i, path: "/huncho-world-game-pack", image: "assets/huncho-world-game-pack.jpg" },
+    { match: /police/i, path: "/huncho-npc-police", image: "assets/huncho-npc-police.jpg" },
+    { match: /job ?center/i, path: "/huncho-job-center", image: "assets/huncho-job-center.jpg" },
+    { match: /book ?bag/i, path: "/huncho-designer-bookbags", image: "assets/huncho-designer-bookbags.jpg" },
+  ],
+};
+
+/* Shown until the Tebex token is set (or if Tebex can't be reached). */
+const FALLBACK = [
+  { id:"f-phone", name:"Huncho Phone", image:"assets/huncho-phone.jpg", category:"Scripts",
+    text:"A complete smartphone with ten phone models, real foldables and working keys, FaceLink video calls, social apps, Mail and music. Also sold as a 5-model Standard edition.",
+    tags:["Qbox","QBCore","ESX","5 languages"] },
+  { id:"f-gamepack", name:"Huncho World Game Pack", image:"assets/huncho-world-game-pack.jpg", category:"Scripts",
+    text:"Eight realistic table games in one resource: Beer Pong, Card Hub, Cee-lo, Dominoes, Oh Bih Please, Oh Bih Roulette, Slumlords and Tumbling Towers. Real tables, synced seats and bots.",
+    tags:["Qbox","QBCore","ESX","Standalone"] },
+  { id:"f-npcpolice", name:"Huncho NPC Police", image:"assets/huncho-npc-police.jpg", category:"Scripts",
+    text:"NPC police that answer your server's crimes while no real officers are on duty: traffic stops, pursuits with K9 and air units, evidence, full booking and jail.",
+    tags:["Qbox","QBCore","ESX","Standalone"] },
+  { id:"f-jobcenter", name:"Huncho Job Center", image:"assets/huncho-job-center.jpg", category:"Scripts",
+    text:"30 animated civilian jobs with crews, daily bonuses, leaderboards and a paycheck at clock-out. In-game location and uniform editors.",
+    tags:["Qbox","QBCore","ESX"] },
+  { id:"f-bookbags", name:"Huncho Designer Bookbags", image:"assets/huncho-designer-bookbags.jpg", category:"Scripts",
+    text:"88 lore-friendly designer bookbags, each its own inventory, with shoulder straps, three wear styles and in-game boutiques.",
+    tags:["Qbox","QBCore","ESX","8 inventories"] },
+];
+
+/* ===================== STATE ===================== */
+const API = "https://headless.tebex.io/api";
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} },
+};
+let products = [];      // normalized
+let categories = [];
+let live = false;
+let activeCat = "All";
+let cart = store.get("hw_cart", []);   // [package id]
+const $ = s => document.querySelector(s);
+
+/* ===================== HELPERS ===================== */
+const pageUrl = () => location.origin + location.pathname;
+const money = (n, cur) => { try{ return new Intl.NumberFormat(undefined,{style:"currency",currency:cur||"USD"}).format(n); }catch(e){ return (cur||"$")+" "+Number(n).toFixed(2); } };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const docsPathFor = name => (CONFIG.docs.find(d => d.match.test(name)) || {}).path || null;
+
+function toast(msg, kind){
+  const t = $("#toast"); t.textContent = msg; t.className = "toast on " + (kind||"");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.className = "toast", 4200);
+}
+
+function sanitize(html){
+  const doc = new DOMParser().parseFromString(html || "", "text/html");
+  doc.querySelectorAll("script,style,object,embed,form,link,meta").forEach(n => n.remove());
+  doc.querySelectorAll("iframe").forEach(f => { if(!/^https:\/\/(www\.)?(youtube(-nocookie)?\.com|player\.vimeo\.com|streamable\.com)\//.test(f.src)) f.remove(); });
+  doc.querySelectorAll("*").forEach(el => [...el.attributes].forEach(a => {
+    if(/^on/i.test(a.name) || (/^(href|src)$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) el.removeAttribute(a.name);
+  }));
+  doc.querySelectorAll("a").forEach(a => { a.target = "_blank"; a.rel = "noopener"; });
+  return doc.body.innerHTML;
+}
+const plain = html => { const d = new DOMParser().parseFromString(html||"", "text/html"); d.querySelectorAll("script,style").forEach(n => n.remove()); return (d.body.textContent || "").replace(/\s+/g," ").trim(); };
+
+async function tebex(path, opts = {}){
+  const res = await fetch(API + path, {
+    method: opts.method || "GET",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  let json = null; try{ json = await res.json(); }catch(e){}
+  if(!res.ok) throw new Error((json && (json.detail || json.message || json.title)) || ("Tebex error " + res.status));
+  return json;
+}
+const acct = p => "/accounts/" + encodeURIComponent(CONFIG.tebexToken) + p;
+
+/* ===================== CATALOG ===================== */
+async function loadCatalog(){
+  renderSkeleton();
+  if(CONFIG.tebexToken){
+    try{
+      const res = await tebex(acct("/categories?includePackages=1"));
+      const cats = (res && res.data) || [];
+      products = [];
+      cats.forEach(c => (c.packages || []).forEach(p => products.push({
+        id: p.id, name: p.name, image: p.image || (CONFIG.docs.find(d => d.match.test(p.name)) || {}).image || "", category: c.name,
+        html: p.description, text: plain(p.description),
+        price: p.total_price, base: p.base_price, discount: p.discount, currency: p.currency,
+        tags: [], live: true,
+      })));
+      categories = cats.filter(c => (c.packages||[]).length).map(c => c.name);
+      live = true;
+    }catch(e){
+      console.warn("Tebex catalog failed, showing fallback:", e);
+      useFallback("Couldn't reach Tebex: " + e.message);
+    }
+  } else {
+    useFallback("Preview mode: add your Tebex public token to CONFIG.tebexToken to load live packages, prices and checkout.");
+  }
+  cart = cart.filter(id => products.some(p => p.id === id));
+  store.set("hw_cart", cart);
+  renderTabs(); renderGrid(); renderCart();
+}
+function useFallback(note){
+  live = false;
+  products = FALLBACK.map(p => ({ ...p, html: "<p>" + esc(p.text) + "</p>", live: false }));
+  categories = [];
+  const n = $("#devnote"); n.textContent = note; n.hidden = !CONFIG.tebexToken ? false : true;
+  if(CONFIG.tebexToken) console.info(note);
+}
+
+function renderSkeleton(){ $("#grid").innerHTML = '<div class="skel"></div>'.repeat(3); }
+
+function renderTabs(){
+  const tabs = ["All", ...categories];
+  $("#tabs").hidden = tabs.length < 3;
+  $("#tabs").innerHTML = tabs.map(c => `<button role="tab" class="${c===activeCat?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+}
+
+function priceHtml(p){
+  if(!p.live) return '<span class="price" style="font-size:14px;color:var(--muted)">See price on Tebex</span>';
+  const was = p.discount > 0 && p.base > p.price ? `<s>${money(p.base,p.currency)}</s>` : "";
+  return `<span class="price">${was}${money(p.price,p.currency)}</span>`;
+}
+
+function renderGrid(){
+  const q = $("#search").value.trim().toLowerCase();
+  const list = products.filter(p => (activeCat==="All" || p.category===activeCat) && (!q || (p.name+" "+p.text).toLowerCase().includes(q)));
+  if(!list.length){ $("#grid").innerHTML = '<div class="empty">No scripts match that search.</div>'; return; }
+  $("#grid").innerHTML = list.map(p => {
+    const docs = docsPathFor(p.name);
+    const inCart = cart.includes(p.id);
+    const buy = p.live
+      ? `<button class="btn ${inCart?"":"primary"}" data-add="${p.id}">${inCart?"In cart":"Add to cart"}</button>`
+      : `<a class="btn primary" href="${esc(CONFIG.tebexStoreUrl)}" target="_blank" rel="noopener">Buy</a>`;
+    return `<article class="card">
+      <div class="thumb" data-open="${p.id}" style="background-image:url('${esc(p.image||"")}')">${p.live && p.discount>0 ? '<span class="sale">SALE</span>' : ""}</div>
+      <div class="body">
+        <h3 class="title" data-open="${p.id}">${esc(p.name)}</h3>
+        <p class="desc">${esc(p.text)}</p>
+        ${p.tags.length ? `<div class="meta">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
+        <div class="row">${priceHtml(p)}
+          <div class="actions">${docs ? `<button class="btn ghost" data-docs="${docs}">Docs</button>` : ""}${buy}</div>
+        </div>
+      </div></article>`;
+  }).join("");
+}
+
+function openProduct(id){
+  const p = products.find(x => String(x.id) === String(id)); if(!p) return;
+  const docs = docsPathFor(p.name);
+  const inCart = cart.includes(p.id);
+  $("#modal").innerHTML = `
+    <button class="x" data-close>&times;</button>
+    <div class="thumb" style="background-image:url('${esc(p.image||"")}')"></div>
+    <div class="mb">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">${esc(p.name)}</h2>${priceHtml(p)}
+      </div>
+      <div class="actions">
+        ${p.live ? `<button class="btn ${inCart?"":"primary"}" data-add="${p.id}">${inCart?"In cart":"Add to cart"}</button>`
+                 : `<a class="btn primary" href="${esc(CONFIG.tebexStoreUrl)}" target="_blank" rel="noopener">Buy on Tebex</a>`}
+        ${docs ? `<button class="btn" data-docs="${docs}">Open docs</button>` : ""}
+      </div>
+      <div class="rich">${sanitize(p.html)}</div>
+    </div>`;
+  show("#modal");
+}
+
+/* ===================== CART ===================== */
+function renderCart(){
+  const items = cart.map(id => products.find(p => p.id === id)).filter(Boolean);
+  $("#cartCount").textContent = items.length || "";
+  $("#cartItems").innerHTML = items.length ? items.map(p => `
+    <div class="item">${p.image ? `<img src="${esc(p.image)}" alt="">` : `<span class="badge" style="width:72px;height:40px">HW</span>`}<div class="n">${esc(p.name)}<div class="p">${p.live?money(p.price,p.currency):""}</div></div>
+    <button class="rm" data-rm="${p.id}">Remove</button></div>`).join("")
+    : '<div class="empty" style="padding:40px 0">Your cart is empty.</div>';
+  const cur = items[0] && items[0].currency;
+  $("#cartTotal").textContent = items.length ? money(items.reduce((s,p)=>s+(+p.price||0),0), cur) : "—";
+  $("#checkoutBtn").disabled = !items.length;
+}
+function addToCart(id){
+  id = isNaN(id) ? id : Number(id);
+  if(!cart.includes(id)){ cart.push(id); store.set("hw_cart", cart); toast("Added to cart", "ok"); }
+  renderCart(); renderGrid(); if($("#modal").classList.contains("on")) openProduct(id);
+}
+function removeFromCart(id){
+  cart = cart.filter(x => String(x) !== String(id)); store.set("hw_cart", cart); renderCart(); renderGrid();
+}
+
+/* ===================== CHECKOUT ===================== */
+// Flow: create basket → Cfx.re sign-in (FiveM stores require it) → add packages → Tebex.js checkout.
+async function getBasket(){
+  let ident = store.get("hw_basket", null);
+  if(ident){
+    try{
+      const b = (await tebex(acct("/baskets/" + ident))).data;
+      if(b && !b.complete) return b;
+    }catch(e){}
+  }
+  const b = (await tebex(acct("/baskets"), { method:"POST", body:{
+    complete_url: pageUrl() + "?checkout=complete",
+    cancel_url: pageUrl(),
+    complete_auto_redirect: true,
+  }})).data;
+  store.set("hw_basket", b.ident);
+  return b;
+}
+
+async function checkout(){
+  if(!live || !cart.length) return;
+  const btn = $("#checkoutBtn"); btn.disabled = true; btn.textContent = "Preparing…";
+  try{
+    let basket = await getBasket();
+    if(!basket.username){
+      const links = await tebex(acct("/baskets/" + basket.ident + "/auth?returnUrl=" + encodeURIComponent(pageUrl() + "?resume=1")));
+      const list = Array.isArray(links) ? links : (links.data || []);
+      if(list.length){
+        toast("Sign in with Cfx.re to continue…");
+        location.href = list[0].url;
+        return;
+      }
+    }
+    await finishCheckout(basket);
+  }catch(e){
+    console.error(e); toast(e.message, "bad");
+  }finally{
+    btn.disabled = !cart.length; btn.textContent = "Checkout";
+  }
+}
+
+async function finishCheckout(basket){
+  const already = new Set((basket.packages || []).map(p => p.id));
+  for(const id of cart){
+    if(already.has(id)) continue;
+    basket = (await tebex("/baskets/" + basket.ident + "/packages", { method:"POST", body:{ package_id:id, quantity:1 }})).data || basket;
+  }
+  // drop anything removed from the cart since the basket was made
+  for(const p of (basket.packages || [])){
+    if(!cart.includes(p.id)) await tebex("/baskets/" + basket.ident + "/packages/remove", { method:"POST", body:{ package_id:p.id }}).catch(()=>{});
+  }
+  launchTebex(basket);
+}
+
+function launchTebex(basket){
+  if(!window.Tebex){
+    if(basket.links && basket.links.checkout){ location.href = basket.links.checkout; return; }
+    throw new Error("Checkout failed to load. Please try again.");
+  }
+  Tebex.checkout.init({
+    ident: basket.ident,
+    theme: "dark",
+    colors: [{ name:"primary", color:CONFIG.brand.primary }, { name:"secondary", color:CONFIG.brand.secondary }],
+  });
+  Tebex.checkout.on("payment:complete", paid);
+  Tebex.checkout.launch();
+  hide();
+}
+
+function paid(){
+  cart = []; store.set("hw_cart", cart); store.del("hw_basket");
+  renderCart(); renderGrid();
+  toast("Payment complete! Your scripts are on their way to your Cfx.re keymaster.", "ok");
+}
+
+async function resumeAfterAuth(){
+  const ident = store.get("hw_basket", null); if(!ident || !cart.length) return;
+  try{
+    const b = (await tebex(acct("/baskets/" + ident))).data;
+    if(!b.username){ toast("Sign-in wasn't completed. Hit Checkout to try again.", "bad"); return; }
+    toast("Signed in as " + b.username + ". Opening checkout…", "ok");
+    await finishCheckout(b);
+  }catch(e){ toast(e.message, "bad"); }
+}
+
+/* ===================== GITBOOK DOCS EMBED ===================== */
+let gbReady = false;
+function loadDocsEmbed(){
+  const s = document.createElement("script");
+  s.src = CONFIG.docsSiteUrl + "/~gitbook/embed/script.js";
+  s.async = true;
+  s.onload = () => {
+    try{
+      window.GitBook("init", { siteURL: CONFIG.docsSiteUrl }, { colorScheme: "dark" });
+      window.GitBook("configure", {
+        button: { label: "Ask the docs", icon: "book" },
+        suggestions: ["How do I install Huncho Phone?", "Which frameworks are supported?", "How do I update a script?"],
+      });
+      window.GitBook("show");
+      gbReady = true;
+    }catch(e){ console.warn("GitBook embed init failed", e); }
+  };
+  s.onerror = () => console.warn("GitBook embed script didn't load. Check Settings → AI & MCP in GitBook for the embed URL.");
+  document.head.appendChild(s);
+}
+function openDocs(path){
+  if(gbReady){
+    try{
+      window.GitBook("open");
+      if(path && path !== "/") window.GitBook("navigateToPage", path);
+      hide(); return;
+    }catch(e){}
+  }
+  window.open(CONFIG.docsSiteUrl + (path === "/" ? "" : path), "_blank", "noopener");
+}
+
+/* ===================== UI WIRING ===================== */
+function show(sel){ $("#scrim").classList.add("on"); $(sel).classList.add("on"); }
+function hide(){ ["#scrim","#cart","#modal"].forEach(s => $(s).classList.remove("on")); }
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-add],[data-rm],[data-open],[data-docs],[data-cat],[data-close],#scrim,#openCart,#checkoutBtn");
+  if(!t) return;
+  if(t.dataset.add){ addToCart(t.dataset.add); }
+  else if(t.dataset.rm){ removeFromCart(t.dataset.rm); }
+  else if(t.dataset.open){ openProduct(t.dataset.open); }
+  else if(t.dataset.docs){ e.preventDefault(); openDocs(t.dataset.docs); }
+  else if(t.dataset.cat){ activeCat = t.dataset.cat; renderTabs(); renderGrid(); }
+  else if(t.id === "openCart"){ hide(); show("#cart"); }
+  else if(t.id === "checkoutBtn"){ checkout(); }
+  else { hide(); }
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape") hide(); });
+$("#search").addEventListener("input", renderGrid);
+
+["#discordLink","#discordLink2"].forEach(s => $(s).href = CONFIG.discordUrl);
+$("#tebexLink").href = CONFIG.tebexStoreUrl;
+$("#yr").textContent = new Date().getFullYear();
+
+(async function init(){
+  loadDocsEmbed();
+  await loadCatalog();
+  const qs = new URLSearchParams(location.search);
+  if(qs.has("checkout")){ paid(); history.replaceState(null, "", pageUrl()); }
+  else if(qs.has("resume") && live){ history.replaceState(null, "", pageUrl()); resumeAfterAuth(); }
+})();
+</script>
+</body>
+</html>
