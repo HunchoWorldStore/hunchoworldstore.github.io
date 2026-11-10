@@ -1,6 +1,6 @@
 # Huncho World Storefront
 
-**Version 1.0.4**
+**Version 1.0.5**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
@@ -27,11 +27,17 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 | `docsSiteUrl` | Your GitBook site, used for the docs widget |
 | `discordUrl` | Discord invite in the header and footer |
 | `brand` | Checkout popup colours |
+| `hide` | Package or category names to keep off the site (Fayettenam is hidden) |
 | `docs` | Matches a package name to its docs section and a fallback image |
 
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.5
+
+* Fayettenam packages hidden from the store (`CONFIG.hide`)
+* Scripts listed A–Z
 
 ### 1.0.4
 

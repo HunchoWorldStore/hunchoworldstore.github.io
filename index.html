@@ -207,6 +207,8 @@ const CONFIG = {
   docsSiteUrl: "https://huncho-world-store.gitbook.io/huncho-world-store-docs",
   discordUrl: "https://discord.gg/hP8VTtwgs5",
   brand: { primary: "#3b82f6", secondary: "#0c1324" },
+  // Tebex packages (or whole categories) to keep off the site, matched by name.
+  hide: [/fayettenam/i],
   // Matches a Tebex package name to its docs section (first match wins).
   docs: [
     { match: /phone/i, path: "/huncho-phone", image: "assets/huncho-phone.jpg" },
@@ -293,13 +295,15 @@ async function loadCatalog(){
       const res = await tebex(acct("/categories?includePackages=1"));
       const cats = (res && res.data) || [];
       products = [];
-      cats.forEach(c => (c.packages || []).forEach(p => products.push({
+      const hidden = name => CONFIG.hide.some(r => r.test(name || ""));
+      cats.forEach(c => !hidden(c.name) && (c.packages || []).filter(p => !hidden(p.name)).forEach(p => products.push({
         id: p.id, name: p.name, image: p.image || (CONFIG.docs.find(d => d.match.test(p.name)) || {}).image || "", category: c.name,
         html: p.description, text: plain(p.description),
         price: p.total_price, base: p.base_price, discount: p.discount, currency: p.currency,
         tags: [], live: true,
       })));
-      categories = cats.filter(c => (c.packages||[]).length).map(c => c.name);
+      categories = [...new Set(products.map(p => p.category))];
+      products.sort((a, b) => a.name.localeCompare(b.name));
       live = true;
     }catch(e){
       console.warn("Tebex catalog failed, showing fallback:", e);
