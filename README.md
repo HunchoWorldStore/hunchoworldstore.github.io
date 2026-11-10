@@ -1,12 +1,12 @@
 # Huncho World Storefront
 
-**Version 1.0.2**
+**Version 1.0.3**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
 * **Live catalog** from the Tebex Headless API (categories, packages, prices, sales)
 * **Cart + checkout on the site**: Cfx.re sign-in, then the Tebex.js checkout popup, so buyers never leave
-* **GitBook Docs Embed**: "Ask the docs" widget, and every product's **Docs** button opens that script's docs in the widget
+* **GitBook Docs Embed** on desktop: "Ask the docs" widget, and every product's **Docs** button opens that script's docs in the widget. On phones, **Docs** opens the real docs page in a new tab instead
 * Falls back to a built-in catalog with "Buy" links to the Tebex store if Tebex can't be reached
 
 Live at **https://hunchoworldstore.github.io/**. Docs live separately in `HunchoWorldStore/huncho-phone-docs`.
@@ -32,6 +32,10 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.3
+
+* Phones: no docs pop-up. **Docs** buttons open the docs page in a new tab
 
 ### 1.0.2
 

@@ -486,7 +486,10 @@ async function resumeAfterAuth(){
 
 /* ===================== GITBOOK DOCS EMBED ===================== */
 let gbReady = false;
+// Phones and small screens get the real docs pages in a new tab instead of the pop-up widget.
+const isSmallScreen = () => window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 function loadDocsEmbed(){
+  if(isSmallScreen()) return;
   const s = document.createElement("script");
   s.src = CONFIG.docsSiteUrl + "/~gitbook/embed/script.js";
   s.async = true;
@@ -505,7 +508,7 @@ function loadDocsEmbed(){
   document.head.appendChild(s);
 }
 function openDocs(path){
-  if(gbReady){
+  if(gbReady && !isSmallScreen()){
     try{
       window.GitBook("open");
       if(path && path !== "/") window.GitBook("navigateToPage", path);
