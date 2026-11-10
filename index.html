@@ -107,6 +107,7 @@
   .rm{background:none;border:0;color:var(--muted);font-size:13px}
   .rm:hover{color:var(--bad)}
   .dfoot{padding:16px 18px;border-top:1px solid var(--line);display:grid;gap:10px}
+  .fallback{border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.07);border-radius:8px;padding:12px;display:grid;gap:10px;font-size:13px;color:#fecaca}
   .total{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
   .note{color:var(--muted);font-size:12px}
   .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(860px,94vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;z-index:50;opacity:0;pointer-events:none;transition:.2s}
@@ -192,6 +193,10 @@
     <div class="total"><span>Total</span><span id="cartTotal">—</span></div>
     <button class="btn primary" id="checkoutBtn">Checkout</button>
     <div class="note">You'll sign in with your Cfx.re account first, so the script lands in your FiveM keymaster.</div>
+    <div class="fallback" id="fallback" hidden>
+      <div id="fallbackMsg"></div>
+      <a class="btn" id="fallbackBtn" target="_blank" rel="noopener">Finish on Tebex</a>
+    </div>
   </div>
 </aside>
 
@@ -425,6 +430,7 @@ async function getBasket(){
 async function checkout(){
   if(!live || !cart.length) return;
   const btn = $("#checkoutBtn"); btn.disabled = true; btn.textContent = "Preparing…";
+  $("#fallback").hidden = true;
   try{
     let basket = await getBasket();
     if(!basket.username){
@@ -438,7 +444,7 @@ async function checkout(){
     }
     await finishCheckout(basket);
   }catch(e){
-    console.error(e); toast(e.message, "bad");
+    checkoutFailed(e);
   }finally{
     btn.disabled = !cart.length; btn.textContent = "Checkout";
   }
@@ -448,13 +454,30 @@ async function finishCheckout(basket){
   const already = new Set((basket.packages || []).map(p => p.id));
   for(const id of cart){
     if(already.has(id)) continue;
-    basket = (await tebex("/baskets/" + basket.ident + "/packages", { method:"POST", body:{ package_id:id, quantity:1 }})).data || basket;
+    try{
+      basket = (await tebex("/baskets/" + basket.ident + "/packages", { method:"POST", body:{ package_id:id, quantity:1 }})).data || basket;
+    }catch(e){
+      const p = products.find(x => x.id === id);
+      e.packageId = id; e.packageName = p ? p.name : "This script";
+      throw e;
+    }
   }
   // drop anything removed from the cart since the basket was made
   for(const p of (basket.packages || [])){
     if(!cart.includes(p.id)) await tebex("/baskets/" + basket.ident + "/packages/remove", { method:"POST", body:{ package_id:p.id }}).catch(()=>{});
   }
   launchTebex(basket);
+}
+
+function checkoutFailed(e){
+  console.error("Checkout failed", e);
+  store.del("hw_basket");   // start with a fresh basket next time
+  const name = e.packageName;
+  $("#fallbackMsg").textContent = (name ? name + " couldn't be added to checkout here" : "Checkout couldn't start here") +
+    " (Tebex: " + e.message + "). You can still buy it on our Tebex store.";
+  $("#fallbackBtn").href = e.packageId ? CONFIG.tebexStoreUrl.replace(/\/$/, "") + "/package/" + e.packageId
+                         : (cart.length === 1 ? CONFIG.tebexStoreUrl.replace(/\/$/, "") + "/package/" + cart[0] : CONFIG.tebexStoreUrl);
+  $("#fallback").hidden = false;
 }
 
 function launchTebex(basket){
@@ -485,7 +508,7 @@ async function resumeAfterAuth(){
     if(!b.username){ toast("Sign-in wasn't completed. Hit Checkout to try again.", "bad"); return; }
     toast("Signed in as " + b.username + ". Opening checkout…", "ok");
     await finishCheckout(b);
-  }catch(e){ toast(e.message, "bad"); }
+  }catch(e){ show("#cart"); checkoutFailed(e); }
 }
 
 /* ===================== GITBOOK DOCS EMBED ===================== */

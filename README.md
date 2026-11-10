@@ -1,6 +1,6 @@
 # Huncho World Storefront
 
-**Version 1.0.5**
+**Version 1.0.6**
 
 A custom store site for the Huncho World Tebex store. One `index.html`, no build step.
 
@@ -33,6 +33,11 @@ Live at **https://hunchoworldstore.github.io/**. Docs live separately in `Huncho
 **New script?** Add it to Tebex (it shows up on the site by itself), then add a line to `CONFIG.docs` so its **Docs** button and image work.
 
 ## Changelog
+
+### 1.0.6
+
+* If Tebex rejects a checkout, the cart shows which script failed and a **Finish on Tebex** button that opens that package on the Tebex store
+* A failed checkout starts with a fresh basket next time
 
 ### 1.0.5
 
