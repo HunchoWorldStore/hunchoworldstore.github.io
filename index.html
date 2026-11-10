@@ -132,6 +132,13 @@
   .dsi small{color:var(--muted);font-size:12px}
   .field details{font-size:12px}
   .field summary{cursor:pointer;color:var(--blue2)}
+  .coderow{display:flex;gap:8px}
+  .coderow input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line2);color:var(--text);padding:10px 12px;border-radius:8px;font:inherit;font-size:16px;text-transform:uppercase}
+  .coderow input::placeholder{text-transform:none}
+  .coderow input:focus{outline:none;border-color:var(--blue)}
+  .codeon{display:flex;align-items:center;gap:10px;border:1px dashed rgba(34,197,94,.5);background:rgba(34,197,94,.07);border-radius:8px;padding:9px 12px}
+  .codeon b{color:#86efac;letter-spacing:.5px}
+  .codeon small{flex:1;color:var(--muted)}
   .total{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
   .note{color:var(--muted);font-size:12px}
   .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(860px,94vw);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;z-index:50;opacity:0;pointer-events:none;transition:.2s}
@@ -238,6 +245,15 @@
         In Discord: <b>Settings → Advanced</b> → turn on <b>Developer Mode</b>. Then tap or right-click your profile picture and choose <b>Copy User ID</b>.
       </details>
       </label>
+    </div>
+    <div class="field" id="codeField">
+      <span>Have a code?</span>
+      <div class="coderow" id="codeEntry">
+        <input id="codeIn" placeholder="Coupon, gift card or creator code" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button class="btn" id="codeBtn" type="button">Apply</button>
+      </div>
+      <div class="codeon" id="codeOn" hidden><b id="codeTxt"></b><small>Applied at checkout</small><button class="rm" id="codeRm" type="button">Remove</button></div>
+      <small class="err" id="codeErr" hidden></small>
     </div>
     <button class="btn primary" id="checkoutBtn">Checkout</button>
     <div class="note">You'll also sign in with your Cfx.re account, so the script lands in your FiveM keymaster.</div>
@@ -524,6 +540,7 @@ async function finishCheckout(basket){
   for(const p of (basket.packages || [])){
     if(!cart.includes(p.id)) await tebex("/baskets/" + basket.ident + "/packages/remove", { method:"POST", body:{ package_id:p.id }}).catch(()=>{});
   }
+  if(!(await applyCode(basket))) return;
   launchTebex(basket);
 }
 
@@ -590,6 +607,45 @@ function variableData(){
   return v ? { [CONFIG.discord.variable]: v } : undefined;
 }
 
+/* ---- coupons / gift cards / creator codes ---- */
+// FiveM stores need the Cfx.re sign-in before a basket takes packages, so the code is
+// saved here and applied to the basket right before the Tebex checkout opens.
+function renderCode(){
+  const c = store.get("hw_code", "");
+  $("#codeEntry").hidden = !!c; $("#codeOn").hidden = !c;
+  $("#codeTxt").textContent = c;
+}
+function saveCode(){
+  const c = $("#codeIn").value.trim().toUpperCase();
+  $("#codeErr").hidden = true;
+  if(!c){ $("#codeIn").focus(); return; }
+  store.set("hw_code", c); $("#codeIn").value = ""; renderCode();
+}
+function codeError(msg){
+  store.del("hw_code"); renderCode();
+  $("#codeErr").textContent = msg; $("#codeErr").hidden = false;
+  hide(); show("#cart");
+}
+async function applyCode(basket){
+  const code = store.get("hw_code", ""); if(!code) return true;
+  const has = (basket.coupons||[]).some(c => (c.code||"").toUpperCase() === code)
+           || (basket.giftcards||[]).some(g => (g.card_number||"").toUpperCase() === code)
+           || (basket.creator_code||"").toUpperCase() === code;
+  if(has) return true;
+  const base = acct("/baskets/" + basket.ident);
+  const tries = [["/coupons", { coupon_code: code }, "Coupon"], ["/giftcards", { card_number: code }, "Gift card"], ["/creator-codes", { creator_code: code }, "Creator code"]];
+  for(const [path, body, kind] of tries){
+    try{
+      const r = await tebex(base + path, { method: "POST", body });
+      if(r && r.success === false) continue;
+      toast(kind + " " + code + " applied", "ok");
+      return true;
+    }catch(e){ /* not this kind of code, try the next */ }
+  }
+  codeError(`"${code}" isn't a valid coupon, gift card or creator code, or it doesn't apply to these scripts.`);
+  return false;
+}
+
 function checkoutFailed(e){
   console.error("Checkout failed", e);
   store.del("hw_basket");   // start with a fresh basket next time
@@ -617,7 +673,7 @@ function launchTebex(basket){
 }
 
 function paid(){
-  cart = []; store.set("hw_cart", cart); store.del("hw_basket");
+  cart = []; store.set("hw_cart", cart); store.del("hw_basket"); store.del("hw_code"); renderCode();
   renderCart(); renderGrid();
   toast("Payment complete! Your scripts are on their way to your Cfx.re keymaster.", "ok");
 }
@@ -662,6 +718,10 @@ $("#tebexLink").href = CONFIG.tebexStoreUrl;
 $("#yr").textContent = new Date().getFullYear();
 renderDiscord();
 $("#discordLogin").addEventListener("click", discordSignIn);
+renderCode();
+$("#codeBtn").addEventListener("click", saveCode);
+$("#codeIn").addEventListener("keydown", e => { if(e.key === "Enter") saveCode(); });
+$("#codeRm").addEventListener("click", () => { store.del("hw_code"); renderCode(); });
 $("#discordSwitch").addEventListener("click", () => { store.del("hw_discord_user"); renderDiscord(); discordSignIn(); });
 $("#discordId").value = store.get("hw_discord", "");
 $("#discordId").addEventListener("input", () => { $("#discordId").classList.remove("bad"); $("#discordErr").hidden = true; });
