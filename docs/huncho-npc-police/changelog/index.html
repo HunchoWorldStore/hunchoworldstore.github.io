@@ -24,6 +24,14 @@
 <div class="crumb"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.93 4.93.71.71"/><path d="M12 12v6"/></svg><a href="/docs/huncho-npc-police/">NPC Police</a></div>
 <h1>Changelog</h1>
 
+<h2 id="1280">1.28.0</h2>
+<ul>
+<li><strong>Officer first aid.</strong> Getting hurt or downed no longer gets anyone out of an arrest.</li>
+<li><strong>Downed:</strong> the officers stay with a downed suspect. After 15 seconds the nearest one walks over, gives CPR for 10 seconds, revives them with the ambulance script's own revive and arrests them on the spot.</li>
+<li><strong>Revived another way:</strong> if EMS, a friend or another script revives them first, they're still arrested right there.</li>
+<li><strong>Hurt:</strong> a suspect under 80% health is patched up by the officer once cuffed.</li>
+<li>All settings are in <code>Config.FirstAid</code>. Set <code>enabled = false</code> to go back to the old behavior.</li>
+</ul>
 <h2 id="1270">1.27.0</h2>
 <ul>
 <li><strong>Healed before jail.</strong> Anyone jailed while hurt is healed first: full health with armor kept, blood and visible damage cleaned off, and the ambulance script's injuries cleared (ak47_ambulancejob skelly fix, qb-ambulancejob injuries). Works with every prison script. Turn it off with <code>Config.HealOnJail = false</code>.</li>
@@ -144,7 +152,7 @@
 <nav class="pn"><a class="prev" href="/docs/huncho-npc-police/reference/troubleshooting/"><small>Previous</small>Troubleshooting</a><span></span></nav>
 <p class="edit">Can't find what you need? <a href="https://discord.gg/hP8VTtwgs5" target="_blank" rel="noopener">Open a ticket on Discord</a>.</p>
 </article></main>
-  <aside class="toc only-xl"><div class="tocin"><b>On this page</b><a class="t2" href="#1270">1.27.0</a><a class="t2" href="#1262">1.26.2</a><a class="t2" href="#1261">1.26.1</a><a class="t2" href="#1260">1.26.0</a><a class="t2" href="#1253">1.25.3</a><a class="t2" href="#1252">1.25.2</a><a class="t2" href="#1251">1.25.1</a><a class="t2" href="#1250">1.25.0</a><a class="t2" href="#1241">1.24.1</a><a class="t2" href="#1240">1.24.0</a><a class="t2" href="#1232">1.23.2</a><a class="t2" href="#1231">1.23.1</a><a class="t2" href="#1230">1.23.0</a><a class="t2" href="#1220">1.22.0</a><a class="t2" href="#1210">1.21.0</a><a class="t2" href="#1200-1201">1.20.0 - 1.20.1</a><a class="t2" href="#1190">1.19.0</a><a class="t2" href="#1180">1.18.0</a><a class="t2" href="#1170">1.17.0</a><a class="t2" href="#1160-1161">1.16.0 - 1.16.1</a><a class="t2" href="#1150-1156">1.15.0 - 1.15.6</a><a class="t2" href="#earlier">Earlier</a></div></aside>
+  <aside class="toc only-xl"><div class="tocin"><b>On this page</b><a class="t2" href="#1280">1.28.0</a><a class="t2" href="#1270">1.27.0</a><a class="t2" href="#1262">1.26.2</a><a class="t2" href="#1261">1.26.1</a><a class="t2" href="#1260">1.26.0</a><a class="t2" href="#1253">1.25.3</a><a class="t2" href="#1252">1.25.2</a><a class="t2" href="#1251">1.25.1</a><a class="t2" href="#1250">1.25.0</a><a class="t2" href="#1241">1.24.1</a><a class="t2" href="#1240">1.24.0</a><a class="t2" href="#1232">1.23.2</a><a class="t2" href="#1231">1.23.1</a><a class="t2" href="#1230">1.23.0</a><a class="t2" href="#1220">1.22.0</a><a class="t2" href="#1210">1.21.0</a><a class="t2" href="#1200-1201">1.20.0 - 1.20.1</a><a class="t2" href="#1190">1.19.0</a><a class="t2" href="#1180">1.18.0</a><a class="t2" href="#1170">1.17.0</a><a class="t2" href="#1160-1161">1.16.0 - 1.16.1</a><a class="t2" href="#1150-1156">1.15.0 - 1.15.6</a><a class="t2" href="#earlier">Earlier</a></div></aside>
 </div>
 <div class="search" id="search" hidden>
   <div class="sbox"><div class="sin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Search guides, fixes & config options…" autocomplete="off"><button class="esc" data-close>Esc</button></div>
